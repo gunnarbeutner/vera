@@ -675,6 +675,24 @@ proc vera_db_getinviter {user} {
 	return [lindex $row 0]
 }
 
+proc vera_db_setcountry {user country} {
+	global vera_connection
+
+	mysqlexec $vera_connection "UPDATE users SET `country` = '[mysqlescape $country]' WHERE `account`='[mysqlescape $user]'"
+}
+
+proc vera_db_getcountry {user} {
+	global vera_connection
+
+	set query [mysqlquery $vera_connection "SELECT `country` FROM `users` WHERE `account`='[mysqlescape $user]'"]
+
+	set row [mysqlnext $query]
+
+	mysqlendquery $query
+
+	return [lindex $row 0]
+}
+
 proc vera_db_getcreated {account} {
 	global vera_connection
 
@@ -699,6 +717,24 @@ proc vera_db_getbirthday {user} {
 	global vera_connection
 
 	set query [mysqlquery $vera_connection "SELECT `birthday` FROM `users` WHERE `account`='[mysqlescape $user]'"]
+
+	set row [mysqlnext $query]
+
+	mysqlendquery $query
+
+	return [lindex $row 0]
+}
+
+proc vera_db_setminecraft {user minecraft} {
+	global vera_connection
+
+	mysqlexec $vera_connection "UPDATE users SET `minecraft` = '[mysqlescape $minecraft]' WHERE `account`='[mysqlescape $user]'"
+}
+
+proc vera_db_getminecraft {user} {
+	global vera_connection
+
+	set query [mysqlquery $vera_connection "SELECT `minecraft` FROM `users` WHERE `account`='[mysqlescape $user]'"]
 
 	set row [mysqlnext $query]
 

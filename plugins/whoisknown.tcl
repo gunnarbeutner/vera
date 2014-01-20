@@ -22,13 +22,13 @@ proc vera_whoisknown {nick arguments} {
 			}
 
 			if {[string length $status] > 300} {
-				vera_answer_direct "$desc: $status"
+				vera_answer_direct "$desc: [join $status]"
 				set status ""
 			}
 		}
 
 		if {$status != ""} {
-			vera_answer_direct "$desc: $status"
+			vera_answer_direct "$desc: [join $status]"
 		}
 
 		incr level

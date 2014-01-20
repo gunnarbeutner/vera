@@ -30,13 +30,15 @@ proc vera_ban {nick chan arguments} {
 			}
 
 			pushmode $chan +b "*!*@$account.users.quakenet.org"
-			newchanban $chan "*!*@$account.users.quakenet.org" [vera_getaccount $nick] [vera_db_getrule $reason] 0
+			newchanban $chan "*!*@$account.users.quakenet.org" $myaccount [vera_db_getrule $reason] 0
+			vera_answer_direct "Added ban: \002*!*@$account.users.quakenet.org\002, Reason: \002[vera_db_getrule $reason]\002"
 		}
 
 		if {[getchanhost $ban] != "" && ![string match "*@*.users.quakenet.org" [getchanhost $ban]]} {
 			pushmode $chan +b [maskhost [getchanhost $ban]]
+			newchanban $chan [maskhost [getchanhost $ban]] $myaccount [vera_db_getrule $reason] 0
+			vera_answer_direct "Added ban: \002[maskhost [getchanhost $ban]]\002, Reason: \002[vera_db_getrule $reason]\002"
 
-			newchanban $chan [maskhost [getchanhost $ban]] [vera_getaccount $nick] [vera_db_getrule $reason] 0
 		}
 	} elseif {[string match "*!*@*" $ban]} {
 		foreach user [internalchanlist $chan] {
@@ -51,8 +53,9 @@ proc vera_ban {nick chan arguments} {
 			
 		}
 
-		newchanban $chan $ban [vera_getaccount $nick] [vera_db_getrule $reason] 0
-		vera_answer_direct "Done."
+		newchanban $chan $ban $myaccount [vera_db_getrule $reason] 0
+		vera_answer_direct "Nobody matching \002$ban\002 on $chan, adding to internal banlist\, Reason: \002[vera_db_getrule $reason]\002"
+		vera_answer_direct "\002Warning:\002 People matching this host will be kickbanned on join."
 	} else {
 		vera_answer_direct "$ban is neither a nick nor a hostmask."
 	}
@@ -75,13 +78,15 @@ proc vera_bans {nick chan arguments} {
 		puthelp "NOTICE $nick :\002[lindex $ban 0]\002 set by [lindex $ban 5]: [lindex $ban 1]"
 	}
 
-	puthelp "NOTICE $nick :End of CHANBANS."
+	puthelp "NOTICE $nick :End of BANS."
 }
 
 proc vera_unban {nick chan arguments} {
 	global botnick
 
 	set ban [lindex $arguments 0]
+	set iban [lindex $arguments 0]
+	set bans [banlist $chan]
 
 	if {$ban == ""} {
 		set ban [lindex [lindex [chanbans $chan] [expr [llength [chanbans $chan]] - 1]] 0]
@@ -93,15 +98,23 @@ proc vera_unban {nick chan arguments} {
 		set ban [lindex [lindex [banlist $chan] [lsearch [banlist $chan] "$ban *"]] 0]
 	}
 
-	if {$ban == ""} {
-		vera_answer_direct "There is no such ban."
+	if {$ban == "" && [lsearch -index 0 -exact $bans $iban] == -1} {
+		vera_answer_direct "There is no such ban set on $chan"
+		return
+	}
+        if {$ban == "" && [lsearch -index 0 -exact $bans $iban] != -1} {
+                killchanban $chan [lindex $iban 0]
+                vera_answer_direct "Removed ban: \002[lindex $iban 0]\002 from the internal banlist for \002$chan\002"
 	} else {
 		killchanban $chan [lindex $ban 0]
 		pushmode $chan -b [lindex $ban 0]
 
 		vera_answer_direct "Done."
 	}
+
+
 }
+
 
 proc vera_unbanall {nick chan arguments} {
 	puthelp "MODE $chan +b-b *!*@* *!*@*"
@@ -113,6 +126,12 @@ vera_register "ban" 3 1 "vera_ban" {
 	/msg $::botnick ban ?channel? <host/nick> [reason]
 	Bans the specified hostmask/nick.
 }
+
+vera_register "out" 3 1 "vera_ban" {
+        /msg $::botnick out ?channel? <host/nick> [reason]
+        Bans the specified hostmask/nick.
+}
+
 
 vera_register "bans" 3 1 "vera_bans" {
 	/msg $::botnick bans ?channel?
@@ -128,3 +147,4 @@ vera_register "unbanall" 3 1 "vera_unbanall" {
 	/msg $::botnick unbanall ?channel?
 	Removes all bans on a specific channel.
 }
+

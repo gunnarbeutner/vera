@@ -31,6 +31,22 @@ proc vera_whois {nick arguments} {
 			set invited ""
 		}
 
+		set countryinfo ""
+
+		set tld [vera_db_getcountry $account]
+
+		if {$tld != ""} {
+			set countryinfo ", Country: [vera_db_tld2country $tld]"
+		}
+
+		set mcinfo ""
+
+		set mcname [vera_db_getminecraft $account]
+
+		if {$mcname != ""} {
+			set mcinfo ", Minecraft user: $mcname"
+		}
+
 		set createdinfo ""
 
 		set created [vera_db_getcreated $account]
@@ -39,7 +55,7 @@ proc vera_whois {nick arguments} {
 			set createdinfo ", Created: [clock format $created]"
 		}
 
-		vera_answer "[vera_prettyuser $user] (Account: $account$createdinfo) is $article $level $invited"
+		vera_answer "[vera_prettyuser $user] (Account: $account$countryinfo$mcinfo$createdinfo) is $article $level $invited"
 	}
 }
 

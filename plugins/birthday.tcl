@@ -100,7 +100,7 @@ proc vera_birthday {nick arguments} {
 	set birthday [vera_db_getbirthday $account]
 
 	if {$account == "bindi"} {
-		set birthday [expr [clock seconds] - 372176640]
+		set birthday [expr [clock seconds] - 379476640]
 	}
 
 	if {[llength $arguments] < 1 || [vera_getaccount $nick] == $account} {
@@ -113,7 +113,7 @@ proc vera_birthday {nick arguments} {
 		if {$birthday == ""} {
 			vera_answer "I don't know $user's birthday."
 		} else {
-			vera_answer "$user was born on [clock format $birthday -format "%A %B %d %Y"]. He is [yearsBetween $birthday [clock seconds]] years old."
+			vera_answer "$user was born on [clock format $birthday -format "%A %B %d %Y"] and is [yearsBetween $birthday [clock seconds]] years old."
 		}
 	}
 }
